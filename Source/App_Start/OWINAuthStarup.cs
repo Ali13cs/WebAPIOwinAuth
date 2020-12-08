@@ -15,11 +15,24 @@ namespace WebAPIOwinAuth.App_Start
         {
             // For more information on how to configure your application, //visit http://go.microsoft.com/fwlink/?LinkID=316888
             app.UseCors(CorsOptions.AllowAll);
+            var TokenExpirationTime = System.Web.Configuration.WebConfigurationManager.AppSettings["TokenExpirationMinutes"];
+            double TokenExpirationMinutes = 30;
+            if (!string.IsNullOrEmpty(TokenExpirationTime))
+            {
+                try
+                {
+                    TokenExpirationMinutes = Convert.ToInt64(TokenExpirationTime);
+                }
+                catch (Exception ex)
+                {
+                    TokenExpirationMinutes = 30;
+                }
+            }
             OAuthAuthorizationServerOptions option = new OAuthAuthorizationServerOptions
             {
                 TokenEndpointPath = new PathString("/token"),
                 Provider = new ApplicationAuthProvider(),
-                AccessTokenExpireTimeSpan = TimeSpan.FromMinutes(60),
+                AccessTokenExpireTimeSpan = TimeSpan.FromMinutes(TokenExpirationMinutes),
                 AllowInsecureHttp = true
             };
             app.UseOAuthAuthorizationServer(option);
